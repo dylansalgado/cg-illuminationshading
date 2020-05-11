@@ -91,7 +91,8 @@ class GlApp {
         let texture = this.gl.createTexture();
 
         // TODO: set texture parameters and upload a temporary 1px white RGBA array [255,255,255,255]
-        // ...
+        // 
+	//this.gl.bindTexture(gl.TEXTURE_2D, texture);
 
         // download the actual image
         let image = new Image();
@@ -102,23 +103,30 @@ class GlApp {
         }, false);
         image.src = image_url;
 
-        return texture;
+       return texture;
     }
 
     UpdateTexture(texture, image_element) {
         // TODO: update image for specified texture
+	console.log(image_element);
+	//glTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image_element);
     }
 
     Render() {
         // delete previous frame (reset both framebuffer and z-buffer)
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-        
+        console.log(scene);
         // draw all models
         for (let i = 0; i < this.scene.models.length; i ++) {
             // NOTE: you need to properly select shader here
-            let selected_shader = 'emissive';
+		
+	    //Get selected shader
+            var selected_shader = this.algorithm + "_" + this.scene.models[i].shader;
+            // var selected_shader = "emissive";
             this.gl.useProgram(this.shader[selected_shader].program);
-
+        console.log(selected_shader);
+        console.log(this.shader[selected_shader]);
+        console.log(this.gl.getError());
             // transform model to proper position, size, and orientation
             glMatrix.mat4.identity(this.model_matrix);
             glMatrix.mat4.translate(this.model_matrix, this.model_matrix, this.scene.models[i].center);
@@ -127,6 +135,13 @@ class GlApp {
             glMatrix.mat4.rotateX(this.model_matrix, this.model_matrix, this.scene.models[i].rotate_x);
             glMatrix.mat4.scale(this.model_matrix, this.model_matrix, this.scene.models[i].size);
 
+	    //Pass data from the scene into the shader uniform variables
+	    this.gl.uniform3fv(this.shader[selected_shader].uniform.light_ambient, this.scene.light.ambient)
+	    this.gl.uniform3fv(this.shader[selected_shader].uniform.light_position, this.scene.light.point_lights[0].position)
+	    this.gl.uniform3fv(this.shader[selected_shader].uniform.light_color, this.scene.light.point_lights[0].color)
+	    this.gl.uniform3fv(this.shader[selected_shader].uniform.camera_position, this.scene.camera.position)
+	    this.gl.uniform1f(this.shader[selected_shader].uniform.material_shininess, this.scene.models[i].material.shininess);
+	    this.gl.uniform3fv(this.shader[selected_shader].uniform.material_specular, this.scene.models[i].material.specular);
             this.gl.uniform3fv(this.shader[selected_shader].uniform.material_color, this.scene.models[i].material.color);
             this.gl.uniformMatrix4fv(this.shader[selected_shader].uniform.projection_matrix, false, this.projection_matrix);
             this.gl.uniformMatrix4fv(this.shader[selected_shader].uniform.view_matrix, false, this.view_matrix);
@@ -135,6 +150,7 @@ class GlApp {
             this.gl.bindVertexArray(this.vertex_array[this.scene.models[i].type]);
             this.gl.drawElements(this.gl.TRIANGLES, this.vertex_array[this.scene.models[i].type].face_index_count, this.gl.UNSIGNED_SHORT, 0);
             this.gl.bindVertexArray(null);
+
         }
 
         // draw all light sources
@@ -155,6 +171,7 @@ class GlApp {
             this.gl.drawElements(this.gl.TRIANGLES, this.vertex_array['sphere'].face_index_count, this.gl.UNSIGNED_SHORT, 0);
             this.gl.bindVertexArray(null);
         }
+	
     }
 
     UpdateScene(scene) {
@@ -282,4 +299,5 @@ class GlApp {
             alert("An error occurred linking the shader program.");
         }
     }
+
 }
