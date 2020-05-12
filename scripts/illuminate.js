@@ -87,19 +87,18 @@ class GlApp {
     }
 
     InitializeTexture(image_url) {
-        // create a texture, and upload a temporary 1px white RGBA array [255,255,255,255]
-        let texture = this.gl.createTexture();
+    // create a texture, and upload a temporary 1px white RGBA array [255,255,255,255]
+    let texture = this.gl.createTexture();
 
-        // TODO: set texture parameters and upload a temporary 1px white RGBA array [255,255,255,255]
-        // 
+    // TODO: set texture parameters and upload a temporary 1px white RGBA array [255,255,255,255]
 	//this.gl.bindTexture(gl.TEXTURE_2D, texture);
 
         // download the actual image
         let image = new Image();
         image.crossOrigin = 'anonymous';
         image.addEventListener('load', (event) => {
-            // once image is downloaded, update the texture image
-            this.UpdateTexture(texture, image);
+        // once image is downloaded, update the texture image
+        this.UpdateTexture(texture, image);
         }, false);
         image.src = image_url;
 
@@ -118,22 +117,22 @@ class GlApp {
         console.log(scene);
         // draw all models
         for (let i = 0; i < this.scene.models.length; i ++) {
-            // NOTE: you need to properly select shader here
+        // NOTE: you need to properly select shader here
 		
 	    //Get selected shader
-            var selected_shader = this.algorithm + "_" + this.scene.models[i].shader;
-            // var selected_shader = "emissive";
-            this.gl.useProgram(this.shader[selected_shader].program);
+        var selected_shader = this.algorithm + "_" + this.scene.models[i].shader;
+        // var selected_shader = "emissive";
+        this.gl.useProgram(this.shader[selected_shader].program);
         console.log(selected_shader);
         console.log(this.shader[selected_shader]);
         console.log(this.gl.getError());
-            // transform model to proper position, size, and orientation
-            glMatrix.mat4.identity(this.model_matrix);
-            glMatrix.mat4.translate(this.model_matrix, this.model_matrix, this.scene.models[i].center);
-            glMatrix.mat4.rotateZ(this.model_matrix, this.model_matrix, this.scene.models[i].rotate_z);
-            glMatrix.mat4.rotateY(this.model_matrix, this.model_matrix, this.scene.models[i].rotate_y);
-            glMatrix.mat4.rotateX(this.model_matrix, this.model_matrix, this.scene.models[i].rotate_x);
-            glMatrix.mat4.scale(this.model_matrix, this.model_matrix, this.scene.models[i].size);
+        // transform model to proper position, size, and orientation
+        glMatrix.mat4.identity(this.model_matrix);
+        glMatrix.mat4.translate(this.model_matrix, this.model_matrix, this.scene.models[i].center);
+        glMatrix.mat4.rotateZ(this.model_matrix, this.model_matrix, this.scene.models[i].rotate_z);
+        glMatrix.mat4.rotateY(this.model_matrix, this.model_matrix, this.scene.models[i].rotate_y);
+        glMatrix.mat4.rotateX(this.model_matrix, this.model_matrix, this.scene.models[i].rotate_x);
+         glMatrix.mat4.scale(this.model_matrix, this.model_matrix, this.scene.models[i].size);
 
 	    //Pass data from the scene into the shader uniform variables
 	    this.gl.uniform3fv(this.shader[selected_shader].uniform.light_ambient, this.scene.light.ambient)
@@ -142,14 +141,14 @@ class GlApp {
 	    this.gl.uniform3fv(this.shader[selected_shader].uniform.camera_position, this.scene.camera.position)
 	    this.gl.uniform1f(this.shader[selected_shader].uniform.material_shininess, this.scene.models[i].material.shininess);
 	    this.gl.uniform3fv(this.shader[selected_shader].uniform.material_specular, this.scene.models[i].material.specular);
-            this.gl.uniform3fv(this.shader[selected_shader].uniform.material_color, this.scene.models[i].material.color);
-            this.gl.uniformMatrix4fv(this.shader[selected_shader].uniform.projection_matrix, false, this.projection_matrix);
-            this.gl.uniformMatrix4fv(this.shader[selected_shader].uniform.view_matrix, false, this.view_matrix);
-            this.gl.uniformMatrix4fv(this.shader[selected_shader].uniform.model_matrix, false, this.model_matrix);
+        this.gl.uniform3fv(this.shader[selected_shader].uniform.material_color, this.scene.models[i].material.color);
+        this.gl.uniformMatrix4fv(this.shader[selected_shader].uniform.projection_matrix, false, this.projection_matrix);
+        this.gl.uniformMatrix4fv(this.shader[selected_shader].uniform.view_matrix, false, this.view_matrix);
+        this.gl.uniformMatrix4fv(this.shader[selected_shader].uniform.model_matrix, false, this.model_matrix);
 
-            this.gl.bindVertexArray(this.vertex_array[this.scene.models[i].type]);
-            this.gl.drawElements(this.gl.TRIANGLES, this.vertex_array[this.scene.models[i].type].face_index_count, this.gl.UNSIGNED_SHORT, 0);
-            this.gl.bindVertexArray(null);
+        this.gl.bindVertexArray(this.vertex_array[this.scene.models[i].type]);
+        this.gl.drawElements(this.gl.TRIANGLES, this.vertex_array[this.scene.models[i].type].face_index_count, this.gl.UNSIGNED_SHORT, 0);
+        this.gl.bindVertexArray(null);
 
         }
 
