@@ -135,38 +135,47 @@ class GlApp {
         console.log(scene);
         // draw all models
         for (let i = 0; i < this.scene.models.length; i ++) {
-        // NOTE: you need to properly select shader here
 		
-	    //Get selected shader
-        var selected_shader = this.algorithm + "_" + this.scene.models[i].shader;
-        // var selected_shader = "emissive";
-        this.gl.useProgram(this.shader[selected_shader].program);
-        console.log(selected_shader);
-        console.log(this.shader[selected_shader]);
-        console.log(this.gl.getError());
-        // transform model to proper position, size, and orientation
-        glMatrix.mat4.identity(this.model_matrix);
-        glMatrix.mat4.translate(this.model_matrix, this.model_matrix, this.scene.models[i].center);
-        glMatrix.mat4.rotateZ(this.model_matrix, this.model_matrix, this.scene.models[i].rotate_z);
-        glMatrix.mat4.rotateY(this.model_matrix, this.model_matrix, this.scene.models[i].rotate_y);
-        glMatrix.mat4.rotateX(this.model_matrix, this.model_matrix, this.scene.models[i].rotate_x);
-        glMatrix.mat4.scale(this.model_matrix, this.model_matrix, this.scene.models[i].size);
+	        //Get selected shader
+            var selected_shader = this.algorithm + "_" + this.scene.models[i].shader;
+            this.gl.useProgram(this.shader[selected_shader].program);
+            console.log(selected_shader);
+            console.log(this.shader[selected_shader]);
+            console.log(this.gl.getError());
 
-	    //Pass data from the scene into the shader uniform variables
-	    this.gl.uniform3fv(this.shader[selected_shader].uniform.light_ambient, this.scene.light.ambient)
-	    this.gl.uniform3fv(this.shader[selected_shader].uniform.light_position, this.scene.light.point_lights[0].position)
-	    this.gl.uniform3fv(this.shader[selected_shader].uniform.light_color, this.scene.light.point_lights[0].color)
-	    this.gl.uniform3fv(this.shader[selected_shader].uniform.camera_position, this.scene.camera.position)
-	    this.gl.uniform1f(this.shader[selected_shader].uniform.material_shininess, this.scene.models[i].material.shininess);
-	    this.gl.uniform3fv(this.shader[selected_shader].uniform.material_specular, this.scene.models[i].material.specular);
-        this.gl.uniform3fv(this.shader[selected_shader].uniform.material_color, this.scene.models[i].material.color);
-        this.gl.uniformMatrix4fv(this.shader[selected_shader].uniform.projection_matrix, false, this.projection_matrix);
-        this.gl.uniformMatrix4fv(this.shader[selected_shader].uniform.view_matrix, false, this.view_matrix);
-        this.gl.uniformMatrix4fv(this.shader[selected_shader].uniform.model_matrix, false, this.model_matrix);
+            // transform model to proper position, size, and orientation
+            glMatrix.mat4.identity(this.model_matrix);
+            glMatrix.mat4.translate(this.model_matrix, this.model_matrix, this.scene.models[i].center);
+            glMatrix.mat4.rotateZ(this.model_matrix, this.model_matrix, this.scene.models[i].rotate_z);
+            glMatrix.mat4.rotateY(this.model_matrix, this.model_matrix, this.scene.models[i].rotate_y);
+            glMatrix.mat4.rotateX(this.model_matrix, this.model_matrix, this.scene.models[i].rotate_x);
+            glMatrix.mat4.scale(this.model_matrix, this.model_matrix, this.scene.models[i].size);
 
-        this.gl.bindVertexArray(this.vertex_array[this.scene.models[i].type]);
-        this.gl.drawElements(this.gl.TRIANGLES, this.vertex_array[this.scene.models[i].type].face_index_count, this.gl.UNSIGNED_SHORT, 0);
-        this.gl.bindVertexArray(null);
+            //Pass data from the scene into the shader uniform variables
+            this.gl.uniform3fv(this.shader[selected_shader].uniform.light_ambient, this.scene.light.ambient)
+            this.gl.uniform3fv(this.shader[selected_shader].uniform.light_position, this.scene.light.point_lights[0].position)
+            this.gl.uniform3fv(this.shader[selected_shader].uniform.light_color, this.scene.light.point_lights[0].color)
+            this.gl.uniform3fv(this.shader[selected_shader].uniform.camera_position, this.scene.camera.position)
+            this.gl.uniform1f(this.shader[selected_shader].uniform.material_shininess, this.scene.models[i].material.shininess);
+            this.gl.uniform3fv(this.shader[selected_shader].uniform.material_specular, this.scene.models[i].material.specular);
+            this.gl.uniform3fv(this.shader[selected_shader].uniform.material_color, this.scene.models[i].material.color);
+            this.gl.uniformMatrix4fv(this.shader[selected_shader].uniform.projection_matrix, false, this.projection_matrix);
+            this.gl.uniformMatrix4fv(this.shader[selected_shader].uniform.view_matrix, false, this.view_matrix);
+            this.gl.uniformMatrix4fv(this.shader[selected_shader].uniform.model_matrix, false, this.model_matrix);
+
+            // need to handle shader and texture mapping here
+            // if shader is color, don't need to do anything (handled like scene from index.html)
+            // if shader is texture, have to bind specific texture and pass data like block of code above
+            // (i.e., specify uniform vec2 texture_scale for vertex shader)
+
+            if(this.scene.models[i].shader === 'texture') {
+                this.gl.bindTexture(this.gl.TEXTURE_2D, this.scene.models[i].texture.id);
+                this.gl.uniform2fv(this.shader[selected_shader].uniform.texture_scale, this.scene.models[i].texture.scale);
+            }
+
+            this.gl.bindVertexArray(this.vertex_array[this.scene.models[i].type]);
+            this.gl.drawElements(this.gl.TRIANGLES, this.vertex_array[this.scene.models[i].type].face_index_count, this.gl.UNSIGNED_SHORT, 0);
+            this.gl.bindVertexArray(null);
 
         }
 
