@@ -90,15 +90,28 @@ class GlApp {
     // create a texture, and upload a temporary 1px white RGBA array [255,255,255,255]
     let texture = this.gl.createTexture();
 
-    // TODO: set texture parameters and upload a temporary 1px white RGBA array [255,255,255,255]
-	//this.gl.bindTexture(gl.TEXTURE_2D, texture);
+	console.log(image_url);	
+	//Bind texture
+	this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+	    
+	//Set parameters
+	this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.REPEAT);	
+	this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.REPEAT);
+	this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+	this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
 
+	// Upload temporary array 1px white array
+	let data = new Uint8Array([255, 255, 255, 255]);
+	this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, 1, 1, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, data);
+	    
         // download the actual image
         let image = new Image();
         image.crossOrigin = 'anonymous';
         image.addEventListener('load', (event) => {
-        // once image is downloaded, update the texture image
-        this.UpdateTexture(texture, image);
+            // once image is downloaded, update the texture image
+            this.UpdateTexture(texture, image);
+            // NEED TO CALL RENDER HERE TO NOT CLEAR OUT ALL BUT ONE TEXTURE
+            this.Render();
         }, false);
         image.src = image_url;
 
@@ -106,11 +119,16 @@ class GlApp {
     }
 
     UpdateTexture(texture, image_element) {
-        // TODO: update image for specified texture
 	console.log(image_element);
-	//glTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image_element);
-    }
+	console.log(texture);
+    
+    // bind texture
+    this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
 
+	// Upload image to GPU as texture
+    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, image_element);
+    
+    }
     Render() {
         // delete previous frame (reset both framebuffer and z-buffer)
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
@@ -132,7 +150,7 @@ class GlApp {
         glMatrix.mat4.rotateZ(this.model_matrix, this.model_matrix, this.scene.models[i].rotate_z);
         glMatrix.mat4.rotateY(this.model_matrix, this.model_matrix, this.scene.models[i].rotate_y);
         glMatrix.mat4.rotateX(this.model_matrix, this.model_matrix, this.scene.models[i].rotate_x);
-         glMatrix.mat4.scale(this.model_matrix, this.model_matrix, this.scene.models[i].size);
+        glMatrix.mat4.scale(this.model_matrix, this.model_matrix, this.scene.models[i].size);
 
 	    //Pass data from the scene into the shader uniform variables
 	    this.gl.uniform3fv(this.shader[selected_shader].uniform.light_ambient, this.scene.light.ambient)
